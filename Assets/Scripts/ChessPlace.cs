@@ -7,6 +7,8 @@ public class ChessPlace : MonoBehaviour
 {
     private GameManager _gameManager;
     
+    
+    
     [Header("棋子样式 ")] 
     [SerializeField] private Sprite spriteBlank;
     [SerializeField] private Sprite spriteX ;
