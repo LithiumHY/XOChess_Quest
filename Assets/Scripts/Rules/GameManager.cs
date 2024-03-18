@@ -21,6 +21,9 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    //singleton
+    public static GameManager Instance { get; private set; }
+    
     /// <summary>
     /// 棋子列表
     /// </summary>
@@ -37,14 +40,22 @@ public class GameManager : MonoBehaviour
     
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         
-        DontDestroyOnLoad(transform.gameObject);
         
         _spriteBlank = Resources.Load<Sprite>("Sprites/Blank");
         _spriteX = Resources.Load<Sprite>("Sprites/mark_X");
         _spriteO = Resources.Load<Sprite>("Sprites/mark_O");
         
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneLoaded += OnMainGameLoaded;
     }
 
     /// <summary>
@@ -52,7 +63,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="arg0"></param>
     /// <param name="arg1"></param>
-    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    private void OnMainGameLoaded(Scene arg0, LoadSceneMode arg1)
     {
         //初始化棋子列表
         _chessList = new List<GameObject>();
