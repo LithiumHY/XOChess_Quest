@@ -40,21 +40,38 @@ public class SceneUIManager : MonoBehaviour
             Destroy(gameObject);
         }
         
+        UIInit();
+
+        //界面初始化
+        _menuCanvas.SetActive(true);
+        _pvePanel.SetActive(false);
+        _pvpPanel.SetActive(false);
         
-        //初始化引用
+        //SceneManager.sceneLoaded += OnLoadScene;
+    }
+
+    /// <summary>
+    /// UI初始化，记录引用，绑定监听
+    /// </summary>
+    private void UIInit()
+    {
         _menuCanvas = GameObject.Find("MenuCanvas");
         _gameCanvas = GameObject.Find("GameCanvas");
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         _pvePanel = GameObject.Find("ChooseChessPanel_PVE");
         _pvpPanel = GameObject.Find("ChooseChessPanel_PVP");
         
+        
         PVPButton = GameObject.Find("PVP").GetComponent<Button>();
         PVP_Exit = GameObject.Find("PVP_Exit").GetComponent<Button>();
         PVP_Confirm = GameObject.Find("PVP_Confirm").GetComponent<Button>();
+        _pvpPanel.GetComponent<PVPPanel>().Init();
         
         PVEButton = GameObject.Find("PVE").GetComponent<Button>();
         PVE_Exit = GameObject.Find("PVE_Exit").GetComponent<Button>();
         PVE_Confirm = GameObject.Find("PVE_Confirm").GetComponent<Button>();
+        _pvePanel.GetComponent<PVEPanel>().Init();
+        
         
         Button backButton = GameObject.Find("BackButton").GetComponent<Button>();
         Button pauseButton = GameObject.Find("PauseButton").GetComponent<Button>();
@@ -63,21 +80,16 @@ public class SceneUIManager : MonoBehaviour
         //绑定监听
         PVPButton.onClick.AddListener(()=> ShowPanel(_pvpPanel) );
         PVP_Exit.onClick.AddListener(()=> HidePanel(_pvpPanel) );
-        PVP_Confirm.onClick.AddListener(EnterMultiPlayer);
+        PVP_Confirm.onClick.AddListener(OnPVPConfirmClicked);
 
         PVEButton.onClick.AddListener(() => ShowPanel(_pvePanel));
         PVE_Exit.onClick.AddListener(()=> HidePanel(_pvePanel) );
-        PVE_Confirm.onClick.AddListener(EnterSinglePlayer);
+        PVE_Confirm.onClick.AddListener(OnPVEConfirmClicked);
         
         backButton.onClick.AddListener(ReturnMenu);
-        
-        //界面初始化
-        _menuCanvas.SetActive(true);
-        _pvePanel.SetActive(false);
-        _pvpPanel.SetActive(false);
-        
-        //SceneManager.sceneLoaded += OnLoadScene;
     }
+
+   
 
 
     /// <summary>
@@ -113,23 +125,61 @@ public class SceneUIManager : MonoBehaviour
         //TODO playAnim
     }
     
-    public void EnterSinglePlayer()
+    //TODO 保存玩家的选择信息并传入GameManager
+    private void OnPVEConfirmClicked()
     {
         GameManager.gameMode = PVE;
         _menuCanvas.SetActive(false);
         _gameCanvas.SetActive(true);
+        
+        int chessType = _pvePanel.GetComponent<PVEPanel>().GetChessType();
+        int AIType = _pvePanel.GetComponent<PVEPanel>().GetAIType();
+        bool isPlayerOffensive = _pvePanel.GetComponent<PVEPanel>().GetPlayerOffensive();
+        
+        SetSinglePlayer(chessType, AIType, isPlayerOffensive);
+        
+        void SetSinglePlayer(int ChessType, int AIType, bool isPlayerOffensive)
+        {
+            AIType++;
+            gameManager.curPlayersStats = new List<ChessPlayerStru>()
+            {
+                PlayerStatsUtlis.SetPlayerStatus(0, isPlayerOffensive, ChessType),
+                PlayerStatsUtlis.SetPlayerStatus( (ChessPlayerStatus)AIType, !isPlayerOffensive, ChessType == 0 ? 1 : 0)
+            };
+       
+        }
     }
-    public void EnterMultiPlayer()
+    
+    
+    //TODO 保存玩家的选择信息并传入GameManager
+    public void OnPVPConfirmClicked()
     {
         GameManager.gameMode = PVP;
         _menuCanvas.SetActive(false);
         _gameCanvas.SetActive(true);
+        
+        int P1Chess = _pvpPanel.GetComponent<PVPPanel>().GetP1Type();
+        int P2Chess = _pvpPanel.GetComponent<PVPPanel>().GetP2Type();
+        SetMultiPlayer(P1Chess, P2Chess);
+
+        void SetMultiPlayer(int p1Chess, int p2Chess)
+        {
+            gameManager.curPlayersStats = new List<ChessPlayerStru>()
+            {
+                PlayerStatsUtlis.SetPlayerStatus(0, true, p1Chess),
+                PlayerStatsUtlis.SetPlayerStatus(0, false, p2Chess)
+            };
+        }
     }
 
     public void ReturnMenu()
     {
+        //重置数据和模式
         GameManager.gameMode = Quit;
+        gameManager.curPlayersStats.Clear();
         _gameCanvas.SetActive(false);
+        
+        
         if (!_menuCanvas.gameObject.activeInHierarchy)
         {
             _menuCanvas.SetActive(true);

@@ -6,23 +6,27 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-//TODO：下棋逻辑（在UI上改变）
-//TODO：让AI能够在上面下棋，返回的函数也调用下棋函数
-//TODO：判断输赢
 
 
-//TODO：兼容NodeCanvas
-//TODO：动效和可视化
-//TODO：用Linerenderer显示赢家连成的线
-//TODO：用不同的颜色（描边Shader）显示不同示例
 
-//TODO：设置界面切换不同AI
-//TODO：悔棋
 
 public class GameManager : MonoBehaviour
 {
+    //TODO：下棋逻辑（在UI上改变）
+    //TODO：让AI能够在上面下棋，返回的函数也调用下棋函数
+    //TODO：判断输赢
+
+
+    //TODO：兼容NodeCanvas
+    //TODO：动效和可视化
+    //TODO：用Linerenderer显示赢家连成的线
+    //TODO：用不同的颜色（描边Shader）显示不同示例
+
+    //TODO：悔棋
+    
     //singleton
     public static GameManager Instance { get; private set; }
+    
     
     /// <summary>
     /// 棋子列表
@@ -30,13 +34,16 @@ public class GameManager : MonoBehaviour
     [ShowInInspector] private List<GameObject> _chessList;
 
     [ShowInInspector] private List<GameObject> _emptyChessList;
-    
+    [ShowInInspector] public static GameMode gameMode = GameMode.Quit;
     /// <summary>
     /// 空白棋子Sprite
     /// </summary>
     [SerializeField] private Sprite _spriteBlank;
     [SerializeField] private Sprite _spriteX;
     [SerializeField] private Sprite _spriteO;
+
+    [SerializeField] public List<ChessPlayerStru> curPlayersStats;
+    
     
     private void Awake()
     {
@@ -51,11 +58,14 @@ public class GameManager : MonoBehaviour
         }
         
         
-        _spriteBlank = Resources.Load<Sprite>("Sprites/Blank");
-        _spriteX = Resources.Load<Sprite>("Sprites/mark_X");
-        _spriteO = Resources.Load<Sprite>("Sprites/mark_O");
+        // _spriteBlank = Resources.Load<Sprite>("Sprites/Blank");
+        // _spriteX = Resources.Load<Sprite>("Sprites/mark_X");
+        // _spriteO = Resources.Load<Sprite>("Sprites/mark_O");
+        
+        curPlayersStats = new List<ChessPlayerStru>(2);
         
         SceneManager.sceneLoaded += OnMainGameLoaded;
+        
     }
 
     /// <summary>
@@ -90,11 +100,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-
-    [ShowInInspector] public static GameMode gameMode = GameMode.Quit;
-
-
+    
     /// <summary>
     /// 点击下棋时触发的函数
     /// </summary>
@@ -122,12 +128,12 @@ public class GameManager : MonoBehaviour
 
         return emptyChess;
     }
+
+    
+    
     
 }
 
-public enum GameMode
-{
-    PVP,
-    PVE,
-    Quit
-}
+
+
+
